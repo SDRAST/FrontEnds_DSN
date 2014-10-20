@@ -35,7 +35,11 @@ class DSN_fe(FrontEnd):
       self.outputs[pol].source = self.inputs[self.name]
       self.outputs[pol].source.destinations.append(self.outputs[pol])
       self.outputs[pol].signal = ComplexSignal(self.outputs[pol].source.signal,
-                                               pol=pol[-1], name=self.band)
+                                               pol=pol[-1],
+                                               name=self.band+pol[-1])
+      self.outputs[pol].signal['band'] = self.band
+      self.outputs[pol].signal['frequency'] = self.data['frequency']
+      self.outputs[pol].signal['bandwidth'] = self.data['bandwidth']
     self.logger.debug(" %s outputs: %s", self.name, self.outputs)
     self.logger.debug(" initialized  for %s",self)
 
