@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 
 # No backup files
-*.~
+*~
 *.bak
 
 # C extensions
