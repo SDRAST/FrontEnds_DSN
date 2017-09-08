@@ -59,7 +59,7 @@ class DSN_fe(FrontEnd):
     elif self.band == 'X':
       self.data['frequency'] = 8400
       self.data['bandwidth'] = 400
-    elif self.band == 'K':
+    elif self.band == 'K': # that is, DSN K-band
       self.data['frequency'] = 26250
       self.data['bandwidth'] = 750
     elif self.band == 'Ka':
