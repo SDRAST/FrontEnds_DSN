@@ -3,8 +3,11 @@ Descriptions of DSN front ends without monitor and control functions
 """
 import logging
 
+from math import exp
+
 from MonitorControl import ComplexSignal, ObservatoryError
 from MonitorControl.FrontEnds import FrontEnd
+from MonitorControl.FrontEnds.DSN.noise_parameters import T1, T2, a
 
 module_logger = logging.getLogger(__name__)
 
@@ -28,7 +31,8 @@ class DSN_fe(FrontEnd):
     FrontEnd.__init__(self, name, inputs=inputs, output_names=output_names)
     self.logger = mylogger
     self.name = name
-    self.band = self.name[:-2]
+    self.band = self.name[:-2] # This assumes a name like X14
+    self.dss = int(self.name[-2:])
     self.get_frequencies()
     self.logger.debug(" assigning output port properties")
     for pol in self.outputs.keys():
@@ -67,3 +71,32 @@ class DSN_fe(FrontEnd):
       self.data['bandwidth'] = 1000
     else:
       raise ObservatoryError(self.data["band"],"Is not a valid DSN band")
+  
+  def rx_noise_temp(self, pol="R", mode="X", elevation=90):
+    """
+    Noise temperature measured at the feed
+    
+    From Appendix A of 810-005 module 101
+    
+    @param pol : either 'R' (DSN standard) or 'L'
+    @type  pol : int
+    
+    @param mode : either 'X' or 'SX' for dual (diplexer in)
+    @type  mode : str
+    
+    @param elevation : angle in deg  from horizon to zenith
+    @type  elevation : float
+    """
+    return T1[self.dss][self.band][pol][mode] + \
+           T2[self.dss][self.band][pol][mode] * \
+                              exp(-a[self.dss][self.band][pol][mode]*elevation)
+ 
+  def Tsys_vacuum(self, pol="R", mode="X", elevation=90):
+    """
+    System temperature without an atmosphere
+    
+    This ignores attenuation through the atmosphere. Attenuation by the
+    atmosphere is about 0.8% at S-band and between 0.8 and 1.3% at X-band.
+    It also ignore ground pickup
+    """
+    return 2.725 + self.rx_noise_temp(pol, mode, elevation)
