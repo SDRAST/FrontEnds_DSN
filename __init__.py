@@ -92,13 +92,22 @@ class DSN_fe(FrontEnd):
            T2[self.dss][self.band][pol][mode] * \
                               exp(-a[self.dss][self.band][pol][mode]*elevation)
  
-  def Tsys_vacuum(self, pol="R", mode="X", elevation=90):
+  def Tsys_vacuum(self, beam=1, pol="R", mode="X", elevation=90):
     """
     System temperature without an atmosphere
     
     This ignores attenuation through the atmosphere. Attenuation by the
     atmosphere is about 0.8% at S-band and between 0.8 and 1.3% at X-band.
     It also ignore ground pickup
+    
+    @param beam : beam number, only significant for K-band
+    @type  beam : int
+    
+    @param pol : polarization, "R" or "L"
+    @type  pol : str
+    
+    @param mode : "X" or "SX", only significant for X-band
+    @type  mode : str
     """
     return 2.725 + self.rx_noise_temp(pol, mode, elevation)
 
