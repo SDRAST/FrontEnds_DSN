@@ -1,7 +1,7 @@
 """
 Antenna-Microwave Noise Temperature Parameters, Referenced to Feedhorn
 
-The table below is takeng fro 810-005 module 101, Table A3.
+The table below is taken from 810-005 module 101, Table A3.
 
 Unless crab14 is fixed, python command line tests should do this before imports
 import IPython
