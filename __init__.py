@@ -5,14 +5,13 @@ import logging
 
 from math import exp
 
-from MonitorControl import ComplexSignal, ObservatoryError
-from MonitorControl.FrontEnds import FrontEnd
-from MonitorControl.FrontEnds.DSN.noise_parameters import T1, T2, a
+import MonitorControl as MC
+from .noise_parameters import T1, T2, a
 
 module_logger = logging.getLogger(__name__)
 
 
-class DSN_fe(FrontEnd):
+class DSN_fe(MC.FrontEnds.FrontEnd):
   """
   Class for DSN front ends with no M&C functions
   """
@@ -29,17 +28,17 @@ class DSN_fe(FrontEnd):
     self.name = name # needed by the next statement
     mylogger.debug(" initializing %s", self)
     mylogger.debug(" %s inputs: %s", name, inputs)
-    FrontEnd.__init__(self, name, inputs=inputs, output_names=output_names)
+    MC.FrontEnds.FrontEnd.__init__(self, name, inputs=inputs, output_names=output_names)
     self.logger = mylogger
     self.name = name
     self.band = self.name[:-2] # This assumes a name like X14
     self.dss = int(self.name[-2:])
     self.get_frequencies()
     self.logger.debug(" assigning output port properties")
-    for pol in self.outputs.keys():
+    for pol in list(self.outputs.keys()):
       self.outputs[pol].source = self.inputs[self.name]
       self.outputs[pol].source.destinations.append(self.outputs[pol])
-      self.outputs[pol].signal = ComplexSignal(self.outputs[pol].source.signal,
+      self.outputs[pol].signal = MC.ComplexSignal(self.outputs[pol].source.signal,
                                                pol=pol[-1],
                                                name=self.band+pol[-1])
       self.outputs[pol].signal['band'] = self.band
@@ -50,13 +49,17 @@ class DSN_fe(FrontEnd):
 
   def get_frequencies(self):
     """
-    The downlink bands allocated to Space Research (Space to Earth) are
+    The downlink bands allocated to Space Research (Space to Earth) are::
+    
                     S          X           K            Ka
-    near Earth: 2200-2290  8450-8500  25500-27000
-    deep space: 2290-2300  8400-8450               31800-32300
-    Reference:http://deepspace.jpl.nasa.gov/dsndocs/810-005/201/201B.pdf
+      near Earth: 2200-2290  8450-8500  25500-27000
+      deep space: 2290-2300  8400-8450               31800-32300
+      
+    Reference
+    ---------
+    http://deepspace.jpl.nasa.gov/dsndocs/810-005/201/201B.pdf
 
-    The actual bandpasses are given below.
+    The actual bandpasses are given in the code.
     """
     if self.band == 'S':
       self.data['frequency'] = 2250
@@ -71,7 +74,7 @@ class DSN_fe(FrontEnd):
       self.data['frequency'] = 32000
       self.data['bandwidth'] = 1000
     else:
-      raise ObservatoryError(self.data["band"],"Is not a valid DSN band")
+      raise MC.MonitorControlError(self.data["band"],"Is not a valid DSN band")
   
   def rx_noise_temp(self, pol="R", mode="X", elevation=90):
     """
